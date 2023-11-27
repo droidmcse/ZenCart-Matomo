@@ -79,7 +79,7 @@ function matomo_ga_alternative_install()
     $sql_data_array = array(
         'configuration_title' => 'Matomo URL',
         'configuration_key' => 'MATOMO_GA_ALTERNATIVE_URL',
-        'configuration_value' => 'https://antidote.usmarketingpros.com/', // set this later
+        'configuration_value' => 'https://www.yourmatomo.com/', // set this later
         'configuration_description' => 'URL where to point for matomo',
         'configuration_group_id' => $insert_id,
         'sort_order' => 5,

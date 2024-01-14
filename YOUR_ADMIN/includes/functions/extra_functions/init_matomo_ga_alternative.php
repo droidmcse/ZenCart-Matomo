@@ -27,6 +27,25 @@ if (function_exists('zen_register_admin_page')) {
         zen_register_admin_page('matomo_ga_alternative', 'BOX_CONFIGURATION_MATOMO_GA_ALTERNATIVE', 'FILENAME_CONFIGURATION', '', 'configuration', 'Y', 99);
         matomo_ga_alternative_install();
     }
+
+    // This item is new so might want to add it to an existing installation if upgrading
+    if( !defined('MATOMO_GA_ALTERNATIVE_MODEL_SKU') ) {
+        $sql = 'select configuration_group_id from ' . TABLE_CONFIGURATION_GROUP . ' where configuration_group_title = "Matomo GA Alternative";';
+        $results = $db->Execute($sql);
+	$group_id = $results->fields['configuration_group_id'];
+
+        $sql_data_array = array(
+            'configuration_title' => 'Use Model as SKU',
+            'configuration_key' => 'MATOMO_GA_ALTERNATIVE_MODEL_SKU',
+            'configuration_value' => 'false',
+            'configuration_description' => 'Report the product model as the SKU, otherwise use the product ID number.',
+            'configuration_group_id' => $group_id,
+            'sort_order' => 17,
+            'date_added' => 'now()',
+            'set_function' => "zen_cfg_select_option(array('true', 'false'),"
+        );
+        zen_db_perform(TABLE_CONFIGURATION, $sql_data_array);
+    }
 }
 
 function matomo_ga_alternative_install()
@@ -83,8 +102,7 @@ function matomo_ga_alternative_install()
         'configuration_description' => 'URL where to point for matomo',
         'configuration_group_id' => $insert_id,
         'sort_order' => 5,
-        'date_added' => 'now()',
-        'configuration_tab' => 'General'
+        'date_added' => 'now()'
     );
     zen_db_perform(TABLE_CONFIGURATION, $sql_data_array);
 
@@ -95,8 +113,7 @@ function matomo_ga_alternative_install()
         'configuration_description' => 'Site id for matomo',
         'configuration_group_id' => $insert_id,
         'sort_order' => 6,
-        'date_added' => 'now()',
-        'configuration_tab' => 'General'
+        'date_added' => 'now()'
     );
     zen_db_perform(TABLE_CONFIGURATION, $sql_data_array);
 
@@ -108,8 +125,7 @@ function matomo_ga_alternative_install()
         'configuration_group_id' => $insert_id,
         'sort_order' => 10,
         'date_added' => 'now()',
-        'set_function' => "zen_cfg_select_option(array('true', 'false'),",
-        'configuration_tab' => 'General'
+        'set_function' => "zen_cfg_select_option(array('true', 'false'),"
     );
     zen_db_perform(TABLE_CONFIGURATION, $sql_data_array);
 
@@ -121,8 +137,7 @@ function matomo_ga_alternative_install()
         'configuration_group_id' => $insert_id,
         'sort_order' => 15,
         'date_added' => 'now()',
-        'set_function' => "zen_cfg_select_option(array('true', 'false'),",
-        'configuration_tab' => 'General'
+        'set_function' => "zen_cfg_select_option(array('true', 'false'),"
     );
     zen_db_perform(TABLE_CONFIGURATION, $sql_data_array);
 
@@ -134,8 +149,7 @@ function matomo_ga_alternative_install()
         'configuration_group_id' => $insert_id,
         'sort_order' => 20,
         'date_added' => 'now()',
-        'set_function' => "zen_cfg_select_option(array('true', 'false'),",
-        'configuration_tab' => 'General'
+        'set_function' => "zen_cfg_select_option(array('true', 'false'),"
     );
     zen_db_perform(TABLE_CONFIGURATION, $sql_data_array);
 
@@ -148,8 +162,7 @@ Note: Server side DoNotTrack support has been enabled, so this option will have 
         'configuration_group_id' => $insert_id,
         'sort_order' => 30,
         'date_added' => 'now()',
-        'set_function' => "zen_cfg_select_option(array('true', 'false'),",
-        'configuration_tab' => 'General'
+        'set_function' => "zen_cfg_select_option(array('true', 'false'),"
     );
     zen_db_perform(TABLE_CONFIGURATION, $sql_data_array);
 
@@ -161,8 +174,7 @@ Note: Server side DoNotTrack support has been enabled, so this option will have 
         'configuration_group_id' => $insert_id,
         'sort_order' => 40,
         'date_added' => 'now()',
-        'set_function' => "zen_cfg_select_option(array('true', 'false'),",
-        'configuration_tab' => 'General'
+        'set_function' => "zen_cfg_select_option(array('true', 'false'),"
     );
     zen_db_perform(TABLE_CONFIGURATION, $sql_data_array);
 

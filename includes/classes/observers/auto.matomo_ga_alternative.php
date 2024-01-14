@@ -65,14 +65,20 @@ class zcObserverMatomoGaAlternative extends base
             $this->debugMessages[] = __METHOD__ . ' :: ' . __LINE__ . ' :: ' . $this->body_id;
             //echo __FILE__ . ' :: ' . __METHOD__ . ' :: ' . PHP_EOL;
             $products_price = '';
-            $prices = get_products_prices((int) $_GET['products_id']);
-            if ($prices['products_map'] < $prices['products_price']) {
-                $products_price = str_replace(['$', ','], '', strip_tags(ts_get_products_display_price((int) $_GET['products_id'])));
-            }
+            $products_price = filter_var(strip_tags(zen_get_products_display_price((int) $_GET['products_id'])), FILTER_SANITIZE_NUMBER_FLOAT);
+            
+            if (defined('MATOMO_GA_ALTERNATIVE_MODEL_SKU') && MATOMO_GA_ALTERNATIVE_MODEL_SKU == 'true') {
+                $sku = zen_get_products_model( (int) $_GET['products_id'] );
+	    }
+	    else {
+	        $sku = (int) $_GET['products_id'];
+	    }
+
             $this->matomo_event = '
 _paq.push([\'setEcommerceView\',
-    "' . (int) $_GET['products_id'] . '", 
-    "' . htmlentities(zen_get_products_name((int) $_GET['products_id'])) . '", 
+    "' . $sku . '", 
+    "' . htmlentities(zen_get_products_name((int) $_GET['products_id'])) . '",
+    "' . htmlentities(zen_get_products_category_id((int) $_GET['products_id'])) . '",
     ' . $products_price . ' 
 ]);' . PHP_EOL;
         }
@@ -84,11 +90,12 @@ _paq.push([\'setEcommerceView\',
             $matomo_string = '';
             $replace_characters = array("$", ",");
             for ($i = 0, $n = sizeof($products); $i < $n; $i++) {
-                $products_price = str_replace(['$', ','], '', strip_tags(ts_get_products_display_price((int) $products[$i]['id'])));
-                $this->debugMessages[] = __LINE__ . ' :: ' . ts_get_products_display_price((int) $products[$i]['id']);
+                $products_price = filter_var(strip_tags(zen_get_products_display_price((int) $_GET['products_id'])), FILTER_SANITIZE_NUMBER_FLOAT);
+                $this->debugMessages[] = __LINE__ . ' :: ' . zen_get_products_display_price((int) $products[$i]['id']);
                 $matomo_string .= "_paq.push(['addEcommerceItem',";
                 $matomo_string .= '"' . $products[$i]['id'] . '",';
                 $matomo_string .= '"' . htmlentities(zen_get_products_name($products[$i]['id'])) . '",';
+                $matomo_string .= '"' . htmlentities(zen_get_products_category_id($products[$i]['id'])) . '",';
                 $matomo_string .= '"' . $products_price . '",';
                 $matomo_string .= '"' . $products[$i]['quantity'] . '"';
                 $matomo_string .= ']);' . PHP_EOL;
@@ -123,11 +130,19 @@ _paq.push([\'setEcommerceView\',
             $orders_products = $db->Execute($orders_products_query);
             $javascript_string = '';
             while (!$orders_products->EOF) {
+                if (defined('MATOMO_GA_ALTERNATIVE_MODEL_SKU') && MATOMO_GA_ALTERNATIVE_MODEL_SKU == 'true') {
+                    $sku = zen_get_products_model( (int) $orders_products->fields['products_id'] );
+	    	}
+	        else {
+	            $sku = (int) (int) $orders_products->fields['products_id'];
+	    	}
+
                 $javascript_string .= "_paq.push(['addEcommerceItem'," . PHP_EOL;
-                $javascript_string .= '"' . $orders_products->fields['products_id'] . '",' . PHP_EOL;
+                $javascript_string .= '"' . $sku . '",' . PHP_EOL;
                 $javascript_string .= '"' . htmlentities($orders_products->fields['products_name']) . '",' . PHP_EOL;
+                $javascript_string .= '"' . htmlentities(zen_get_products_category_id((int)$orders_products->fields['products_id'])) . '",' . PHP_EOL;
                 $javascript_string .= '"' . $orders_products->fields['final_price'] . '",' . PHP_EOL;
-                $javascript_string .= '"' . $orders_products->fields['qty'] . '"' . PHP_EOL;
+                $javascript_string .= '"' . $orders_products->fields['products_quantity'] . '"' . PHP_EOL;
                 $javascript_string .= ']);' . PHP_EOL;
                 $orders_products->MoveNext();
             }
@@ -207,10 +222,11 @@ _paq.push([\'trackEcommerceOrder\',
             $products = $_SESSION['cart']->get_products();
 
             for ($i = 0, $n = sizeof($products); $i < $n; $i++) {
-                $products_price = str_replace(['$', ','], "", strip_tags(ts_get_products_display_price((int) $products[$i]['id'])));
+                $products_price = filter_var(strip_tags(zen_get_products_display_price((int) $_GET['products_id'])), FILTER_SANITIZE_NUMBER_FLOAT);
                 $javascript_string .= "_paq.push(['addEcommerceItem'," . PHP_EOL;
                 $javascript_string .= '"' . $products[$i]['id'] . '",' . PHP_EOL;
                 $javascript_string .= '"' . htmlentities(zen_get_products_name($products[$i]['id'])) . '",' . PHP_EOL;
+                $matomo_string .= '"' . htmlentities(zen_get_products_category_id($products[$i]['id'])) . '",';
                 $javascript_string .= '"' . $products_price . '",' . PHP_EOL;
                 $javascript_string .= '"' . $products[$i]['quantity'] . '",' . PHP_EOL;
                 $javascript_string .= ']);' . PHP_EOL;
